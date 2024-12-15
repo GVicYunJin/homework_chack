@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>数字化作业统计平台</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: linear-gradient(to right, #4facfe, #00f2fe);
+            color: white;
+            text-align: center;
+        }
+
+        h1 {
+            margin-top: 30px;
+            font-size: 2.5em;
+        }
+
+        form {
+            margin: 20px 0;
+        }
+
+        textarea {
+            padding: 10px;
+            border-radius: 10px;
+            border: none;
+            width: 50%;
+            font-size: 16px;
+        }
+
+        button {
+            padding: 10px 20px;
+            border: none;
+            background-color: #ff6a00;
+            color: white;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background-color 0.3s ease;
+        }
+
+        button:hover {
+            background-color: #ff9000;
+        }
+
+        .grid-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin: 20px;
+            padding: 20px;
+        }
+
+        .grid-item {
+            background-color: rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            padding: 20px;
+            transition: transform 0.3s ease;
+        }
+
+        .grid-item:hover {
+            transform: scale(1.05);
+        }
+
+        img {
+            max-width: 100%;
+            height: auto;
+        }
+    </style>
+</head>
+<body>
+    <h1>数字化作业统计平台</h1>
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            <ul>
+                {% for category, message in messages %}
+                    <li><strong>{{ category }}:</strong> {{ message }}</li>
+                {% endfor %}
+            </ul>
+        {% endif %}
+    {% endwith %}
+
+    {% if not class_data %}
+    <h2>注册班级</h2>
+    <form action="/register" method="post">
+        <textarea name="student_names" rows="10" placeholder="每行输入一个学生姓名"></textarea><br><br>
+        <button type="submit">注册班级并生成条码</button>
+    </form>
+    {% endif %}
+
+    {% if class_data %}
+    <h2>班级成员及条码</h2>
+    <div class="grid-container">
+        {% for student_id, student_name in class_data.items() %}
+        <div class="grid-item">
+            <p>{{ student_id }}. {{ student_name }}</p>
+            <img src="/static/{{ barcodes[student_id] }}" alt="条码">
+        </div>
+        {% endfor %}
+    </div>
+
+    <form action="/unregister" method="post">
+        <button type="submit">注销班级</button>
+    </form>
+
+    <h2>上传作业条码图片</h2>
+    <form action="/check_homework" method="post" enctype="multipart/form-data">
+        <input type="file" name="barcode_image" accept="image/*"><br><br>
+        <button type="submit">检查作业</button>
+    </form>
+    {% endif %}
+</body>
+</html>
